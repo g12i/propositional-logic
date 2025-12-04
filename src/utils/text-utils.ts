@@ -10,7 +10,7 @@ const replacementMap = new Map(
   })
 );
 
-export function normalizeSentence(sentence: string): string[] {
+export function normalizeAndSplitChars(sentence: string): string[] {
   return sentence
     .toLowerCase()
     .replace(/\s*/g, "")

@@ -32,6 +32,16 @@ export class HierarchicalTree<T> {
   push(item: T | HierarchicalTree<T>) {
     this.items.push(item);
   }
+
+  toString(): string {
+    const itemsString = this.items
+      .map((item) =>
+        item instanceof HierarchicalTree ? item.toString() : item
+      )
+      .join(" ");
+
+    return `${this.type}#(${itemsString})`;
+  }
 }
 
 export function buildHierarchy(chars: string[]): HierarchicalTree<string> {
@@ -40,7 +50,7 @@ export function buildHierarchy(chars: string[]): HierarchicalTree<string> {
 
   for (const ch of chars) {
     if (ch === "(" || ch === "[" || ch === "{") {
-      const node = new HierarchicalTree<string>("bracket");
+      const node = new HierarchicalTree<string>("node");
       stack.top.push(node);
       stack.push(node);
       continue;
