@@ -84,7 +84,11 @@ function mutNormalizeNots(tree: HierarchicalTree<string>): void {
         throw new Error("NOT operator without operand");
       }
 
-      const notNode = new HierarchicalTree<string>(NOT, [nextItem]);
+      const notNode = new HierarchicalTree<string>(NOT, [
+        typeof nextItem === "string"
+          ? new HierarchicalTree<string>("node", [nextItem])
+          : nextItem,
+      ]);
 
       tree.replaceItemAtIndex(index, notNode, 2);
     }

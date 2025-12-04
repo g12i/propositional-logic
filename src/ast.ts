@@ -1,94 +1,63 @@
-import { splitArray } from "./utils/array-utils.js";
 import { AND, EQ, IMPL, NOT, OR } from "./constants.js";
 import { HierarchicalTree } from "./hierarchy.js";
 
 type Literal = {
-  type: "literal";
+  __type: "literal";
   constant: string;
 };
 
 type UnaryOperator = {
-  type: typeof NOT;
+  __type: typeof NOT;
   node: Node;
 };
 
 type BinaryOperator = {
-  type: typeof IMPL | typeof OR | typeof AND | typeof EQ;
+  __type: typeof IMPL | typeof OR | typeof AND | typeof EQ;
   left: Node;
   right: Node;
 };
 
 export type Node = UnaryOperator | BinaryOperator | Literal;
 
-export function parse(node: HierarchicalTree<string>): Node {
-  // Handle binary operators first (higher precedence at top level)
-  const operators = [IMPL, OR, AND, EQ];
+const not = (node: Node): UnaryOperator => ({ __type: NOT, node });
+const literal = (constant: string): Literal => ({
+  __type: "literal",
+  constant,
+});
+const binary = (
+  operator: BinaryOperator["__type"],
+  left: Node,
+  right: Node
+): BinaryOperator => ({
+  __type: operator,
+  left,
+  right,
+});
 
-  for (const op of operators) {
-    const opIndex = node.items.indexOf(op);
-    if (opIndex !== -1) {
-      const left = node.items.slice(0, opIndex);
-      const right = node.items.slice(opIndex + 1);
-
-      if (left.length > 0 && right.length > 0) {
-        const parseItem = (items: (string | HierarchicalTree<string>)[]) => {
-          if (items.length === 1) {
-            const item = items[0];
-            return typeof item === "string"
-              ? { type: "literal", constant: item }
-              : parse(item as HierarchicalTree<string>);
-          }
-          return parse(new HierarchicalTree(items));
-        };
-
-        return {
-          type: op,
-          left: parseItem(left),
-          right: parseItem(right),
-        } as BinaryOperator;
-      }
-    }
+const toTree = <T>(node: T | HierarchicalTree<T>): HierarchicalTree<T> => {
+  if (node instanceof HierarchicalTree) {
+    return node;
   }
 
-  // Handle NOT operator (after binary operators)
-  if (node.items.includes(NOT)) {
-    const parts = splitArray(node.items, NOT);
+  return new HierarchicalTree<T>("tmp", [node]);
+};
 
-    // Count leading NOTs and find the content
-    let notCount = 0;
-    let contentPartIndex = 0;
-
-    for (let i = 0; i < parts.length; i++) {
-      if (parts[i]?.length === 0) {
-        notCount++;
-      } else {
-        contentPartIndex = i;
-        break;
-      }
+export function parse(node: HierarchicalTree<string>): Node {
+  if (node.type === NOT) {
+    if (node.items.length !== 1) {
+      throw new Error("Invalid Tree. Seems like NOT were not normalized.");
     }
 
-    const contentPart = parts[contentPartIndex];
-    if (contentPart && contentPart.length === 0) {
-      throw new Error("Invalid syntax: NOT operator without operand");
+    if (!node.items[0] || !(node.items[0] instanceof HierarchicalTree)) {
+      throw new Error("Invalid Tree. Seems like NOT were not normalized.");
     }
 
-    // Parse the content
-    let result = parse(new HierarchicalTree(contentPart));
-
-    // Wrap in NOT operators from innermost to outermost
-    for (let i = 0; i < notCount; i++) {
-      result = {
-        type: NOT,
-        node: result,
-      } as UnaryOperator;
-    }
-
-    return result;
+    return not(parse(node.items[0]));
   }
 
   // Base case: single literal string
   if (node.length === 1 && typeof node.items[0] === "string") {
-    return { type: "literal", constant: node.items[0] };
+    return literal(node.items[0]);
   }
 
   // If we have a nested single node, unwrap it
@@ -96,11 +65,30 @@ export function parse(node: HierarchicalTree<string>): Node {
     return parse(node.items[0] as HierarchicalTree<string>);
   }
 
+  if (node.length === 3) {
+    const [left, operator, right] = node.items;
+
+    if (
+      operator !== IMPL &&
+      operator !== OR &&
+      operator !== AND &&
+      operator !== EQ
+    ) {
+      throw new Error(`Invalid operator: ${operator}`);
+    }
+
+    if (!left || !right) {
+      throw new Error("Invalid Tree. Expected left and right nodes.");
+    }
+
+    return binary(operator, parse(toTree(left)), parse(toTree(right)));
+  }
+
   throw new Error(`Unable to parse node: ${JSON.stringify(node)}`);
 }
 
 export function stringify(node: Node): string {
-  switch (node.type) {
+  switch (node.__type) {
     case "literal":
       return node.constant;
     case NOT:
@@ -109,50 +97,10 @@ export function stringify(node: Node): string {
     case OR:
     case AND:
     case EQ:
-      return `(${stringify(node.left)} ${node.type} ${stringify(node.right)})`;
+      return `(${stringify(node.left)} ${node.__type} ${stringify(
+        node.right
+      )})`;
     default:
       throw new Error(`Unknown node type: ${(node as any).type}`);
-  }
-}
-
-export function walk(node: Node, fn: (node: Node) => void) {
-  if (node.type === NOT) {
-    walk(node.node, fn);
-  } else if (
-    node.type === IMPL ||
-    node.type === OR ||
-    node.type === AND ||
-    node.type === EQ
-  ) {
-    walk(node.left, fn);
-    walk(node.right, fn);
-  }
-
-  fn(node);
-}
-
-export function bfs(node: Node, fn: (node: Node) => void) {
-  const queue = [node];
-  const visited = new Set<Node>();
-
-  while (queue.length) {
-    const next = queue.shift();
-
-    if (next && !visited.has(next)) {
-      visited.add(next);
-      fn(next);
-
-      if (next.type === NOT) {
-        queue.push(next.node);
-      } else if (
-        next.type === IMPL ||
-        next.type === OR ||
-        next.type === AND ||
-        next.type === EQ
-      ) {
-        queue.push(next.left);
-        queue.push(next.right);
-      }
-    }
   }
 }

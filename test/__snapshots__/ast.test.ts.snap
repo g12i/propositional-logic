@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ast > should parse 1`] = `
+{
+  "__type": "→",
+  "left": {
+    "__type": "~",
+    "node": {
+      "__type": "∨",
+      "left": {
+        "__type": "literal",
+        "constant": "p",
+      },
+      "right": {
+        "__type": "~",
+        "node": {
+          "__type": "literal",
+          "constant": "q",
+        },
+      },
+    },
+  },
+  "right": {
+    "__type": "∨",
+    "left": {
+      "__type": "~",
+      "node": {
+        "__type": "literal",
+        "constant": "p",
+      },
+    },
+    "right": {
+      "__type": "literal",
+      "constant": "q",
+    },
+  },
+}
+`;
