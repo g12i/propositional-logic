@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildHierarchy } from "../src/hierarchy.js";
 import { normalizeAndSplitChars } from "../src/utils/text-utils.js";
 
-describe("hierarchy", () => {
+describe(buildHierarchy.name, () => {
   it("should build hierarchy", () => {
     const sentence = " ~ (p  ~ q) → (~ p  q))";
     const chars = normalizeAndSplitChars(sentence);

@@ -64,15 +64,15 @@ export function buildHierarchy(chars: string[]): HierarchicalTree<string> {
     stack.top.push(ch);
   }
 
-  mutNormalizeNots(root);
+  mut_normalizeNots(root);
 
   return root;
 }
 
-function mutNormalizeNots(tree: HierarchicalTree<string>): void {
+function mut_normalizeNots(tree: HierarchicalTree<string>): void {
   for (const [, node] of tree) {
     if (node instanceof HierarchicalTree) {
-      mutNormalizeNots(node);
+      mut_normalizeNots(node);
     }
   }
 

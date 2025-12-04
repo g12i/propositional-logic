@@ -1,17 +1,17 @@
 import { AND, EQ, IMPL, NOT, OR } from "./constants.js";
 import { HierarchicalTree } from "./hierarchy.js";
 
-type Literal = {
+export type Literal = {
   __type: "literal";
   constant: string;
 };
 
-type UnaryOperator = {
+export type UnaryOperator = {
   __type: typeof NOT;
   node: Node;
 };
 
-type BinaryOperator = {
+export type BinaryOperator = {
   __type: typeof IMPL | typeof OR | typeof AND | typeof EQ;
   left: Node;
   right: Node;
@@ -20,19 +20,12 @@ type BinaryOperator = {
 export type Node = UnaryOperator | BinaryOperator | Literal;
 
 const not = (node: Node): UnaryOperator => ({ __type: NOT, node });
-const literal = (constant: string): Literal => ({
-  __type: "literal",
-  constant,
-});
-const binary = (
+const lit = (constant: string): Literal => ({ __type: "literal", constant });
+const bin = (
   operator: BinaryOperator["__type"],
   left: Node,
   right: Node
-): BinaryOperator => ({
-  __type: operator,
-  left,
-  right,
-});
+): BinaryOperator => ({ __type: operator, left, right });
 
 const toTree = <T>(node: T | HierarchicalTree<T>): HierarchicalTree<T> => {
   if (node instanceof HierarchicalTree) {
@@ -57,7 +50,7 @@ export function parse(node: HierarchicalTree<string>): Node {
 
   // Base case: single literal string
   if (node.length === 1 && typeof node.items[0] === "string") {
-    return literal(node.items[0]);
+    return lit(node.items[0]);
   }
 
   // If we have a nested single node, unwrap it
@@ -81,26 +74,8 @@ export function parse(node: HierarchicalTree<string>): Node {
       throw new Error("Invalid Tree. Expected left and right nodes.");
     }
 
-    return binary(operator, parse(toTree(left)), parse(toTree(right)));
+    return bin(operator, parse(toTree(left)), parse(toTree(right)));
   }
 
   throw new Error(`Unable to parse node: ${JSON.stringify(node)}`);
-}
-
-export function stringify(node: Node): string {
-  switch (node.__type) {
-    case "literal":
-      return node.constant;
-    case NOT:
-      return `${NOT}${stringify(node.node)}`;
-    case IMPL:
-    case OR:
-    case AND:
-    case EQ:
-      return `(${stringify(node.left)} ${node.__type} ${stringify(
-        node.right
-      )})`;
-    default:
-      throw new Error(`Unknown node type: ${(node as any).type}`);
-  }
 }
