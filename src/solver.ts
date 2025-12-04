@@ -1,6 +1,6 @@
-import { type Node, parse, walk } from "./ast.js";
+import { type Node } from "./ast.js";
 import { AND, EQ, IMPL, NOT, OR } from "./constants.js";
-import { buildHierarchy } from "./hierarchy.js";
+import { bfs, isBinary, isLiteral, isUnary } from "./utils/ast-utils.js";
 
 /**
  * A model represents a possible truth assignment for the literals in a sentence.
@@ -15,23 +15,34 @@ type Model = Map<string, boolean>;
  * @returns The boolean result of the evaluation.
  */
 function evaluate(node: Node, model: Model): boolean {
-  switch (node.type) {
-    case "literal":
-      // Literals that are not in the model are considered false.
-      return model.get(node.constant) ?? false;
-    case NOT:
-      return !evaluate(node.node, model);
-    case AND:
-      return evaluate(node.left, model) && evaluate(node.right, model);
-    case OR:
-      return evaluate(node.left, model) || evaluate(node.right, model);
-    case IMPL:
-      // (A -> B) is equivalent to (!A || B)
-      return !evaluate(node.left, model) || evaluate(node.right, model);
-    case EQ:
-      // (A <-> B) is true if both sides have the same truth value.
-      return evaluate(node.left, model) === evaluate(node.right, model);
+  if (isLiteral(node)) {
+    return model.get(node.constant) ?? false;
   }
+
+  if (isUnary(node)) {
+    return !evaluate(node.node, model);
+  }
+
+  if (isBinary(node)) {
+    const leftValue = evaluate(node.left, model);
+    const rightValue = evaluate(node.right, model);
+
+    switch (node.__type) {
+      case AND:
+        return leftValue && rightValue;
+      case OR:
+        return leftValue || rightValue;
+      case IMPL:
+        // (A -> B) is equivalent to (!A || B)
+        return !leftValue || rightValue;
+      case EQ:
+        return leftValue === rightValue;
+      default:
+        throw new Error(`Unknown binary operator: ${(node as any).__type}`);
+    }
+  }
+
+  throw new Error(`Unknown node type: ${(node as any).__type}`);
 }
 
 /**
@@ -43,8 +54,8 @@ function evaluate(node: Node, model: Model): boolean {
 export function isTautology(ast: Node): boolean {
   // 1. Find all unique literals in the AST.
   const literals = new Set<string>();
-  walk(ast, (node) => {
-    if (node.type === "literal") {
+  bfs(ast, (node) => {
+    if (isLiteral(node)) {
       literals.add(node.constant);
     }
   });
@@ -61,9 +72,9 @@ export function isTautology(ast: Node): boolean {
       // Use bitwise operations to assign true/false for each literal.
       const literal = uniqueLiterals[j];
       if ((i >> j) & 1) {
-        model.set(literal, true);
+        model.set(literal!, true);
       } else {
-        model.set(literal, false);
+        model.set(literal!, false);
       }
     }
 
