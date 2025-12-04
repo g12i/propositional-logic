@@ -9,7 +9,7 @@ describe(buildHierarchy.name, () => {
 		const root = buildHierarchy(chars);
 
 		expect(root.toString()).toMatchInlineSnapshot(
-			`"root#(~#(node#(p ∨ ~#(node#(q)))) → node#(~#(node#(p)) ∨ q))"`
+			`"root#(~#(node#(p ∨ ~#(node#(q)))) → node#(~#(node#(p)) ∨ q))"`,
 		);
 	});
 });

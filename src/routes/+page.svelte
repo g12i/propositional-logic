@@ -2,24 +2,18 @@
 	import { normalizeAndSplitChars } from '$lib/utils/text-utils';
 	import { buildHierarchy } from '$lib/hierarchy';
 	import { parse } from '$lib/ast';
+	import { isTautology } from '$lib/solver';
 
 	let sentence = $state('');
-	let hierary = $derived.by(() => {
+	let parsed = $derived.by(() => {
 		try {
-			return buildHierarchy(sentence.split(''));
+			return parse(buildHierarchy(sentence.split('')));
 		} catch (error) {
 			return error instanceof Error ? error : new Error('Unknown error', { cause: error });
 		}
 	});
-	let parsed = $derived.by(() => {
-		try {
-			if (hierary instanceof Error) {
-				throw hierary;
-			}
-			return parse(hierary);
-		} catch (error) {
-			return null;
-		}
+	let tautology = $derived.by(() => {
+		return parsed instanceof Error ? false : isTautology(parsed);
 	});
 
 	const handleInput = (event: Event) => {
@@ -30,15 +24,17 @@
 </script>
 
 <div class="container mx-auto py-16">
-	<div class="grid grid-cols-3 gap-4">
+	<div class="grid grid-cols-2 gap-4">
 		<div>
 			<input type="text" value={sentence} oninput={handleInput} />
+			{#if tautology}
+				✅
+			{:else}
+				❌
+			{/if}
 		</div>
 		<div>
-			<pre>{JSON.stringify(hierary, null, 2)}</pre>
-		</div>
-		<div>
-			<pre>{JSON.stringify(parsed, null, 2)}</pre>
+			<pre>{parsed instanceof Error ? parsed.message : JSON.stringify(parsed, null, 2)}</pre>
 		</div>
 	</div>
 </div>

@@ -4,7 +4,7 @@ import { NOT } from './constants.js';
 export class HierarchicalTree<T> {
 	constructor(
 		public readonly type: string,
-		public readonly items: Array<T | HierarchicalTree<T>> = []
+		public readonly items: Array<T | HierarchicalTree<T>> = [],
 	) {}
 
 	get length() {
@@ -79,7 +79,7 @@ function mut_normalizeNots(tree: HierarchicalTree<string>): void {
 			}
 
 			const notNode = new HierarchicalTree<string>(NOT, [
-				typeof nextItem === 'string' ? new HierarchicalTree<string>('node', [nextItem]) : nextItem
+				typeof nextItem === 'string' ? new HierarchicalTree<string>('node', [nextItem]) : nextItem,
 			]);
 
 			tree.replaceItemAtIndex(index, notNode, 2);

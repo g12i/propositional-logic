@@ -4,13 +4,13 @@ const replacementMap = new Map(
 	Object.entries({
 		'': AND,
 		'': OR,
-		'v': OR,
-		'i': AND,
-		'>': IMPL,
 		'→': IMPL,
 		'': EQ,
-		'~': NOT
-	})
+		'~': NOT,
+		'>': IMPL,
+		'|': OR,
+		'&': AND,
+	}),
 );
 
 export function normalizeAndSplitChars(sentence: string): string[] {

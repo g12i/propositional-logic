@@ -8,20 +8,20 @@ describe(createCombinations.name, () => {
 		expect(result).toEqual([
 			new Map([
 				['p', true],
-				['q', true]
+				['q', true],
 			]),
 			new Map([
 				['p', false],
-				['q', true]
+				['q', true],
 			]),
 			new Map([
 				['p', true],
-				['q', false]
+				['q', false],
 			]),
 			new Map([
 				['p', false],
-				['q', false]
-			])
+				['q', false],
+			]),
 		]);
 	});
 

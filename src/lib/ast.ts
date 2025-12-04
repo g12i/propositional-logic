@@ -24,7 +24,7 @@ const lit = (constant: string): Literal => ({ __type: 'literal', constant });
 const bin = (operator: BinaryOperator['__type'], left: Node, right: Node): BinaryOperator => ({
 	__type: operator,
 	left,
-	right
+	right,
 });
 
 const toTree = <T>(node: T | HierarchicalTree<T>): HierarchicalTree<T> => {
