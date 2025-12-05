@@ -14,7 +14,7 @@ export const isLiteral = (node: Node): node is Literal => {
 	return node.__type === 'literal';
 };
 
-export function bfs(node: Node, callback: (node: Node) => void) {
+export function dfs(node: Node, callback: (node: Node) => void) {
 	const stack = new Stack(node);
 	const visited = new Set();
 

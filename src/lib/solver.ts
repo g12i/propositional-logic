@@ -1,7 +1,7 @@
 import { type Node } from './ast.js';
 import { AND, EQ, IMPL, OR } from './constants.js';
 import { createCombinations } from './utils/array-utils.js';
-import { bfs, isBinary, isLiteral, isUnary } from './utils/ast-utils.js';
+import { dfs, isBinary, isLiteral, isUnary } from './utils/ast-utils.js';
 
 type Model = Map<string, boolean>;
 
@@ -39,7 +39,7 @@ function evaluate(node: Node, model: Model): boolean {
 export function isTautology(ast: Node): boolean {
 	const literalConstants = new Set<string>();
 
-	bfs(ast, (node) => {
+	dfs(ast, (node) => {
 		if (isLiteral(node)) {
 			literalConstants.add(node.constant);
 		}
