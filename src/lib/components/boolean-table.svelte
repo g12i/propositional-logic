@@ -48,10 +48,10 @@
 		</thead>
 		<tbody>
 			{#each rows as { columns, result }}
-				<tr class="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
+				<tr class="not-last:border-b border-neutral-200 hover:bg-neutral-100/50 transition-colors">
 					{#each columns as column}
 						<td class="px-3 py-2 text-center">
-							<span class={column ? 'text-success-800' : 'text-neutral-700'}>
+							<span class={column ? 'text-success-600' : 'text-error-600'}>
 								{Number(column)}
 							</span>
 						</td>

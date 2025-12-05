@@ -47,8 +47,8 @@
 </script>
 
 <div class="py-8 flex flex-col gap-6">
-	<div class="container mx-auto flex flex-col gap-6">
-		<h1 class="text-heading-1 font-heading-1">Analizator KRZ</h1>
+	<div class="container mx-auto px-6 flex flex-col gap-6">
+		<h1 class="text-heading-1 font-heading-1">Kalkulator KRZ</h1>
 
 		<TiptapEditor
 			initialContent={sentence}
@@ -69,7 +69,7 @@
 			},
 		]}
 	>
-		<div class="container mx-auto flex items-center gap-2">
+		<div class="container mx-auto px-6 flex items-center gap-2">
 			{#if status === 'error'}
 				<Bug size={20} />
 				Błąd składni! Upewnij się, że wyrażenie jest poprawne.
@@ -87,8 +87,8 @@
 			{/if}
 		</div>
 	</div>
-	<div class="container mx-auto">
-		<div class="grid grid-cols-2 gap-4">
+	<div class="container mx-auto px-6">
+		<div class="grid grid-rows-2 md:grid-cols-2 md:grid-rows-1 gap-4">
 			<div
 				class="border border-neutral-200 rounded-md overflow-hidden flex flex-col"
 				style="height: 600px;"
@@ -99,7 +99,7 @@
 						Drzewo składni
 					</h3>
 				</div>
-				<div class="flex-1 overflow-hidden flex items-center justify-center">
+				<div class="flex-1 overflow-hidden flex items-center justify-center px-4">
 					{#if sentence.length > 0 && !(parsed instanceof Error)}
 						<AstVisualization ast={parsed} />
 					{:else}
@@ -109,17 +109,14 @@
 					{/if}
 				</div>
 			</div>
-			<div
-				class="border border-neutral-200 rounded-md overflow-hidden flex flex-col"
-				style="height: 600px;"
-			>
+			<div class="border border-neutral-200 rounded-md overflow-hidden flex flex-col">
 				<div class="px-4 py-3 border-b border-neutral-200 bg-neutral-50">
 					<h3 class="text-heading-3 font-heading-3 flex items-center gap-2">
 						<Table2 size={20} color="var(--color-neutral-500)" />
 						Tabela prawdy
 					</h3>
 				</div>
-				<div class="flex-1 overflow-auto flex items-center justify-center">
+				<div class="flex-1 overflow-auto flex items-center justify-center px-4">
 					{#if sentence.length > 0 && !(parsed instanceof Error)}
 						<BooleanTable class="w-full h-full" ast={parsed} />
 					{:else}
