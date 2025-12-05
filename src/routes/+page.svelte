@@ -1,10 +1,19 @@
 <script lang="ts">
-	import { normalizeAndSplitChars } from '$lib/utils/text-utils';
+	import { normalizeSentence } from '$lib/utils/text-utils';
 	import { buildHierarchy } from '$lib/hierarchy';
 	import { parse } from '$lib/ast';
 	import { isTautology } from '$lib/solver';
+	import AstVisualization from '$lib/components/ast-visualisation.svelte';
+	import TiptapEditor from '$lib/components/tiptap-editor.svelte';
+	import type { Editor } from '@tiptap/core';
 
 	let sentence = $state('');
+
+	const handleEditorUpdate = (content: string): string => {
+		sentence = normalizeSentence(content);
+		return sentence;
+	};
+
 	let parsed = $derived.by(() => {
 		try {
 			return parse(buildHierarchy(sentence.split('')));
@@ -15,26 +24,38 @@
 	let tautology = $derived.by(() => {
 		return parsed instanceof Error ? false : isTautology(parsed);
 	});
-
-	const handleInput = (event: Event) => {
-		const value = (event.target as HTMLInputElement).value;
-		const normalized = normalizeAndSplitChars(value);
-		sentence = normalized.join('');
-	};
 </script>
 
-<div class="container mx-auto py-16">
-	<div class="grid grid-cols-2 gap-4">
-		<div>
-			<input type="text" value={sentence} oninput={handleInput} />
-			{#if tautology}
-				✅
-			{:else}
-				❌
-			{/if}
+<div class="container mx-auto py-8">
+	<div class="mb-6">
+		<div class="flex items-center gap-4 mb-4">
+			<div class="flex-1">
+				<TiptapEditor
+					initialContent={sentence}
+					placeholder="Wprowadź wyrażenie logiki zdaniowej (np. p∨~p)"
+					onupdate={handleEditorUpdate}
+				/>
+			</div>
+			<div class="text-xl pt-2">
+				{#if tautology}
+					✅ Tautologia
+				{:else if parsed instanceof Error}
+					❌ Błąd
+				{:else}
+					❌ Nie jest tautologią
+				{/if}
+			</div>
 		</div>
-		<div>
-			<pre>{parsed instanceof Error ? parsed.message : JSON.stringify(parsed, null, 2)}</pre>
-		</div>
+		{#if parsed instanceof Error}
+			<div class="text-red-600 text-sm mt-2">
+				<p>Błąd składni! Upewnij się, że wyrażenie jest poprawne.</p>
+				<p>{parsed.message}</p>
+			</div>
+		{/if}
+		{sentence}
+	</div>
+
+	<div class="border border-gray-200 rounded-lg overflow-hidden" style="height: 600px;">
+		<AstVisualization ast={parsed} />
 	</div>
 </div>

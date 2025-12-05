@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { isTautology } from './solver.js';
-import { normalizeAndSplitChars } from './utils/text-utils.js';
+import { normalizeSentence } from './utils/text-utils.js';
 import { buildHierarchy } from './hierarchy.js';
 import { parse } from './ast.js';
 import { AND, EQ, IMPL, NOT, OR } from './constants.js';
 
 const parseSentence = (sentence: string) => {
-	const chars = normalizeAndSplitChars(sentence);
-	const root = buildHierarchy(chars);
+	const chars = normalizeSentence(sentence);
+	const root = buildHierarchy(chars.split(''));
 	return parse(root);
 };
 

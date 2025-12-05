@@ -13,10 +13,11 @@ const replacementMap = new Map(
 	}),
 );
 
-export function normalizeAndSplitChars(sentence: string): string[] {
+export function normalizeSentence(sentence: string): string {
 	return sentence
 		.toLowerCase()
 		.replace(/\s*/g, '')
 		.split('')
-		.map((char) => replacementMap.get(char) ?? char);
+		.map((char) => replacementMap.get(char) ?? char)
+		.join('');
 }
