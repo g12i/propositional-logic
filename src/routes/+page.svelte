@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { normalizeSentence } from '$lib/utils/text-utils';
-	import { buildHierarchy } from '$lib/hierarchy';
 	import { parse } from '$lib/ast';
-	import { isTautology } from '$lib/solver';
 	import AstVisualization from '$lib/components/ast-visualisation.svelte';
 	import TiptapEditor from '$lib/components/tiptap-editor.svelte';
-	import type { Editor } from '@tiptap/core';
+	import { buildHierarchy } from '$lib/hierarchy';
+	import { isTautology } from '$lib/solver';
+	import { normalizeSentence } from '$lib/utils/text-utils';
 
 	let sentence = $state('');
 
@@ -52,7 +51,6 @@
 				<p>{parsed.message}</p>
 			</div>
 		{/if}
-		{sentence}
 	</div>
 
 	<div class="border border-gray-200 rounded-lg overflow-hidden" style="height: 600px;">

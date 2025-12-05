@@ -1,3 +1,4 @@
+import { Queue } from 'queue-typescript';
 import { Stack } from 'stack-typescript';
 import type { BinaryOperator, Literal, Node, UnaryOperator } from '../ast.js';
 import { AND, EQ, IMPL, NOT, OR } from '../constants.js';
@@ -14,24 +15,46 @@ export const isLiteral = (node: Node): node is Literal => {
 	return node.__type === 'literal';
 };
 
-export function dfs(node: Node, callback: (node: Node) => void) {
-	const stack = new Stack(node);
+export function dfs(node: Node, callback: (node: Node, parent: Node | undefined) => void) {
+	const stack = new Stack<{ node: Node; parent: Node | undefined }>({ node, parent: undefined });
 	const visited = new Set();
 
 	while (stack.length) {
-		const current = stack.pop();
+		const { node: current, parent } = stack.pop();
 
 		if (!visited.has(current)) {
 			visited.add(current);
 
 			if (isUnary(current)) {
-				stack.push(current.node);
+				stack.push({ node: current.node, parent: current });
 			} else if (isBinary(current)) {
-				stack.push(current.left);
-				stack.push(current.right);
+				stack.push({ node: current.left, parent: current });
+				stack.push({ node: current.right, parent: current });
 			}
 
-			callback(current);
+			callback(current, parent);
+		}
+	}
+}
+
+export function bfs(node: Node, callback: (node: Node, parent: Node | undefined) => void) {
+	const queue = new Queue<{ node: Node; parent: Node | undefined }>({ node, parent: undefined });
+	const visited = new Set();
+
+	while (queue.length) {
+		const { node: current, parent } = queue.dequeue();
+
+		if (!visited.has(current)) {
+			visited.add(current);
+
+			if (isUnary(current)) {
+				queue.enqueue({ node: current.node, parent: current });
+			} else if (isBinary(current)) {
+				queue.enqueue({ node: current.left, parent: current });
+				queue.enqueue({ node: current.right, parent: current });
+			}
+
+			callback(current, parent);
 		}
 	}
 }

@@ -1,3 +1,4 @@
+@import '@xyflow/svelte/dist/style.css';
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';

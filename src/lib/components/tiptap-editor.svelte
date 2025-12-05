@@ -59,11 +59,9 @@
 			onUpdate: ({ editor }) => {
 				const newContent = onupdate(editor.getText());
 				editor.commands.setContent(newContent);
-				// Force re-render
 				editorState = { editor };
 			},
 			onTransaction: ({ editor }) => {
-				// Force re-render for active states
 				editorState = { editor };
 			},
 		});
