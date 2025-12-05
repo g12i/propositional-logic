@@ -3,12 +3,14 @@
 	import { createCombinations } from '$lib/utils/array-utils.js';
 	import { dfs, isLiteral } from '$lib/utils/ast-utils.js';
 	import type { Node } from '../ast.js';
+	import type { ClassValue } from 'svelte/elements';
 
 	type Props = {
 		ast: Node;
+		class?: ClassValue;
 	};
 
-	let { ast }: Props = $props();
+	let { ast, class: className }: Props = $props();
 
 	let variables = $derived.by(() => {
 		const variables = new Set<string>();
@@ -32,7 +34,7 @@
 	);
 </script>
 
-<div class="p-8">
+<div class={[className, 'p-8']}>
 	<table class="w-full text-sm">
 		<thead>
 			<tr class="border-b border-neutral-300">

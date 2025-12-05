@@ -7,19 +7,20 @@
 	import Text from '@tiptap/extension-text';
 	import { onDestroy, onMount } from 'svelte';
 	import Button from './ui/button.svelte';
+	import type { ClassValue } from 'svelte/elements';
 
 	type Props = {
 		initialContent: string;
 		onupdate: (editor: Editor) => void;
 		placeholder?: string;
+		class?: ClassValue;
 	};
 
-	let { initialContent = '', onupdate, placeholder }: Props = $props();
+	let { initialContent = '', onupdate, placeholder, class: className }: Props = $props();
 
 	let editorElement = $state<HTMLDivElement>();
 	let floatingMenuElement = $state<HTMLDivElement>();
 	let editorState = $state<{ editor: Editor | null }>({ editor: null });
-	let focused = $state(false);
 
 	const OneLiner = Node.create({
 		name: 'oneLiner',
@@ -57,12 +58,6 @@
 				},
 			},
 			content: initialContent,
-			onFocus: () => {
-				focused = true;
-			},
-			onBlur: () => {
-				focused = false;
-			},
 			onUpdate: ({ editor }) => {
 				onupdate(editor);
 				editorState = { editor };
@@ -71,6 +66,8 @@
 				editorState = { editor };
 			},
 		});
+
+		editorState.editor?.commands.focus();
 	});
 
 	onDestroy(() => {
@@ -86,8 +83,8 @@
 	<div
 		bind:this={floatingMenuElement}
 		class={[
-			'flex gap-1 p-1 bg-white border border-gray-300 rounded-md shadow-sm floating-menu',
-			{ 'invisible!': !focused },
+			'flex items-center gap-1 p-1 bg-white border border-gray-300 rounded-md shadow-sm floating-menu',
+			className,
 		]}
 	>
 		<Button size="sm" variant="ghost" onclick={() => insertSymbol(AND)}>
@@ -107,6 +104,10 @@
 		</Button>
 		<Button size="sm" variant="ghost" onclick={() => insertSymbol('(')}>(</Button>
 		<Button size="sm" variant="ghost" onclick={() => insertSymbol(')')}>)</Button>
+		<div class="h-4 w-px bg-neutral-300"></div>
+		<Button size="sm" variant="ghost" onclick={() => editorState.editor?.commands.clearContent()}>
+			Wyczyść
+		</Button>
 	</div>
 	<div
 		bind:this={editorElement}
