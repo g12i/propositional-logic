@@ -10,7 +10,7 @@
 
 	type Props = {
 		initialContent: string;
-		onupdate: (content: string) => string;
+		onupdate: (editor: Editor) => void;
 		placeholder?: string;
 	};
 
@@ -45,20 +45,19 @@
 					options: {
 						placement: 'top-start',
 						offset: {
-							mainAxis: 8
-						}
+							mainAxis: 8,
+						},
 					},
 				}),
 			],
 			editorProps: {
 				attributes: {
-					class: 'prose prose-sm prose-base focus:outline-none',
+					class: 'prose prose-sm prose-base focus:outline-none w-full p-4',
 				},
 			},
 			content: initialContent,
 			onUpdate: ({ editor }) => {
-				const newContent = onupdate(editor.getText());
-				editor.commands.setContent(newContent);
+				onupdate(editor);
 				editorState = { editor };
 			},
 			onTransaction: ({ editor }) => {
@@ -81,33 +80,29 @@
 		class="flex gap-1 p-1 bg-white border border-gray-300 rounded-lg shadow-sm"
 	>
 		{#if editorState.editor}
-			<Button class="font-mono" size="sm" variant="ghost" onclick={() => insertSymbol(AND)}>
+			<Button size="sm" variant="ghost" onclick={() => insertSymbol(AND)}>
 				{AND}
 			</Button>
-			<Button class="font-mono" size="sm" variant="ghost" onclick={() => insertSymbol(OR)}>
+			<Button size="sm" variant="ghost" onclick={() => insertSymbol(OR)}>
 				{OR}
 			</Button>
-			<Button class="font-mono" size="sm" variant="ghost" onclick={() => insertSymbol(IMPL)}>
+			<Button size="sm" variant="ghost" onclick={() => insertSymbol(IMPL)}>
 				{IMPL}
 			</Button>
-			<Button class="font-mono" size="sm" variant="ghost" onclick={() => insertSymbol(EQ)}>
+			<Button size="sm" variant="ghost" onclick={() => insertSymbol(EQ)}>
 				{EQ}
 			</Button>
-			<Button class="font-mono" size="sm" variant="ghost" onclick={() => insertSymbol(NOT)}>
+			<Button size="sm" variant="ghost" onclick={() => insertSymbol(NOT)}>
 				{NOT}
 			</Button>
-			<Button class="font-mono" size="sm" variant="ghost" onclick={() => insertSymbol('(')}>
-				(
-			</Button>
-			<Button class="font-mono" size="sm" variant="ghost" onclick={() => insertSymbol(')')}>
-				)
-			</Button>
+			<Button size="sm" variant="ghost" onclick={() => insertSymbol('(')}>(</Button>
+			<Button size="sm" variant="ghost" onclick={() => insertSymbol(')')}>)</Button>
 		{/if}
 	</div>
 
 	<div
 		bind:this={editorElement}
-		class="border border-gray-300 rounded-lg p-4 focus-within:ring-2 focus-within:ring-blue-500"
+		class="border border-gray-300 rounded-lg focus-within:ring-1 focus-within:ring-blue-500"
 	></div>
 </div>
 

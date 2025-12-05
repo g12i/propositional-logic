@@ -3,14 +3,18 @@
 	import AstVisualization from '$lib/components/ast-visualisation.svelte';
 	import TiptapEditor from '$lib/components/tiptap-editor.svelte';
 	import { buildHierarchy } from '$lib/hierarchy';
-	import { isTautology } from '$lib/solver';
+	import { isContradiction, isTautology } from '$lib/solver';
 	import { normalizeSentence } from '$lib/utils/text-utils';
+	import type { Editor } from '@tiptap/core';
 
 	let sentence = $state('');
 
-	const handleEditorUpdate = (content: string): string => {
-		sentence = normalizeSentence(content);
-		return sentence;
+	const handleEditorUpdate = (editor: Editor): void => {
+		const startPos = editor.state.selection.from;
+		const rawSentence = editor.getText();
+		sentence = normalizeSentence(rawSentence);
+		editor.commands.setContent(sentence);
+		editor.commands.setTextSelection(startPos - (rawSentence.length - sentence.length));
 	};
 
 	let parsed = $derived.by(() => {
@@ -20,38 +24,43 @@
 			return error instanceof Error ? error : new Error('Unknown error', { cause: error });
 		}
 	});
-	let tautology = $derived.by(() => {
-		return parsed instanceof Error ? false : isTautology(parsed);
-	});
+
+	let tautology = $derived.by(() => (parsed instanceof Error ? false : isTautology(parsed)));
+
+	let contradiction = $derived.by(() =>
+		parsed instanceof Error ? false : isContradiction(parsed),
+	);
 </script>
 
-<div class="container mx-auto py-8">
-	<div class="mb-6">
-		<div class="flex items-center gap-4 mb-4">
-			<div class="flex-1">
-				<TiptapEditor
-					initialContent={sentence}
-					placeholder="Wprowadź wyrażenie logiki zdaniowej (np. p∨~p)"
-					onupdate={handleEditorUpdate}
-				/>
-			</div>
-			<div class="text-xl pt-2">
-				{#if tautology}
-					✅ Tautologia
-				{:else if parsed instanceof Error}
-					❌ Błąd
-				{:else}
-					❌ Nie jest tautologią
-				{/if}
-			</div>
-		</div>
-		{#if parsed instanceof Error}
-			<div class="text-red-600 text-sm mt-2">
-				<p>Błąd składni! Upewnij się, że wyrażenie jest poprawne.</p>
+<div class="container mx-auto py-8 flex flex-col gap-6">
+	<TiptapEditor
+		initialContent={sentence}
+		placeholder="Wprowadź wyrażenie logiki zdaniowej (np. p∨~p)"
+		onupdate={handleEditorUpdate}
+	/>
+
+	{#if (sentence.length > 0 && parsed instanceof Error) || tautology || contradiction}
+		<div
+			class={[
+				'p-4 rounded-md border border-solid',
+				{
+					'bg-error-200 border-error-900 text-red-900':
+						sentence.length > 0 && parsed instanceof Error,
+				},
+				{ 'bg-success-200 border-success-900 text-success-900': tautology },
+				{ 'bg-warning-200 border-warning-900 text-warning-900': contradiction },
+			]}
+		>
+			{#if sentence.length > 0 && parsed instanceof Error}
+				<strong>Błąd składni! Upewnij się, że wyrażenie jest poprawne.</strong>
 				<p>{parsed.message}</p>
-			</div>
-		{/if}
-	</div>
+			{:else if tautology}
+				<strong>Wyrażenie jest tautologią.</strong>
+			{:else if contradiction}
+				<strong>Wyrażenie jest kontrtautologią.</strong>
+			{/if}
+		</div>
+	{/if}
 
 	<div class="border border-gray-200 rounded-lg overflow-hidden" style="height: 600px;">
 		<AstVisualization ast={parsed} />

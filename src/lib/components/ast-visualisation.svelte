@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		Background,
+		BackgroundVariant,
 		ConnectionLineType,
 		SvelteFlow,
 		type Edge as FlowEdge,
@@ -76,7 +77,7 @@
 			data: { label },
 			draggable: false,
 			selectable: false,
-			class: className,
+			class: `rounded-lg! ${className}`,
 		};
 	};
 
@@ -106,7 +107,13 @@
 			if (nodeId) {
 				nodes.push(astNodeToFlowNode(node, nodeId));
 				if (parentId) {
-					edges.push({ id: `${parentId}-${nodeId}`, source: parentId, target: nodeId });
+					edges.push({
+						id: `${parentId}-${nodeId}`,
+						source: parentId,
+						target: nodeId,
+						animated: false,
+						style: `stroke: var(--color-neutral-500);`,
+					});
 				}
 			}
 		});
@@ -137,7 +144,7 @@
 			elementsSelectable={false}
 			selectNodesOnDrag={false}
 		>
-			<Background />
+			<Background patternColor="var(--color-neutral-300)" variant={BackgroundVariant.Dots} />
 		</SvelteFlow>
 	{/if}
 </div>

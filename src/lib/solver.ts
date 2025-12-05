@@ -29,11 +29,11 @@ function evaluate(node: Node, model: Model): boolean {
 			case EQ:
 				return leftValue === rightValue;
 			default:
-				throw new Error(`Unknown binary operator: ${(node as any).__type}`);
+				throw new Error(`Unknown binary operator: ${(node as { __type: string }).__type}`);
 		}
 	}
 
-	throw new Error(`Unknown node type: ${(node as any).__type}`);
+	throw new Error(`Unknown node type: ${(node as { __type: string }).__type}`);
 }
 
 export function isTautology(ast: Node): boolean {
@@ -49,6 +49,26 @@ export function isTautology(ast: Node): boolean {
 
 	for (const model of combinations) {
 		if (!evaluate(ast, model)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+export function isContradiction(ast: Node): boolean {
+	const literalConstants = new Set<string>();
+
+	dfs(ast, (node) => {
+		if (isLiteral(node)) {
+			literalConstants.add(node.constant);
+		}
+	});
+
+	const combinations = createCombinations([...literalConstants], [true, false]);
+
+	for (const model of combinations) {
+		if (evaluate(ast, model)) {
 			return false;
 		}
 	}

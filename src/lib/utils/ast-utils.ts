@@ -72,5 +72,5 @@ export function stringify(node: Node): string {
 		return node.constant;
 	}
 
-	throw new Error(`Unknown node type: ${(node as any).__type}`);
+	throw new Error(`Unknown node type: ${(node as { __type: string }).__type}`);
 }
