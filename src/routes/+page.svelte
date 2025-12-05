@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { parse } from '$lib/ast';
 	import AstVisualization from '$lib/components/ast-visualisation.svelte';
+	import BooleanTable from '$lib/components/boolean-table.svelte';
 	import TiptapEditor from '$lib/components/tiptap-editor.svelte';
 	import { buildHierarchy } from '$lib/hierarchy';
 	import { isContradiction, isTautology } from '$lib/solver';
 	import { normalizeSentence } from '$lib/utils/text-utils';
+	import { Check, X } from '@lucide/svelte';
 	import type { Editor } from '@tiptap/core';
 
-	let sentence = $state('');
+	let sentence = $state('(p∨~p)∨q');
 
 	const handleEditorUpdate = (editor: Editor): void => {
 		const startPos = editor.state.selection.from;
@@ -53,16 +55,30 @@
 		>
 			{#if sentence.length > 0 && parsed instanceof Error}
 				<strong>Błąd składni! Upewnij się, że wyrażenie jest poprawne.</strong>
-				<p>{parsed.message}</p>
 			{:else if tautology}
-				<strong>Wyrażenie jest tautologią.</strong>
+				<p class="flex gap-2 items-center">
+					<Check />
+					<strong> Wyrażenie jest tautologią. Zdanie jest zawsze prawdziwe.</strong>
+				</p>
 			{:else if contradiction}
-				<strong>Wyrażenie jest kontrtautologią.</strong>
+				<p class="flex gap-2 items-center">
+					<X />
+					<strong> Wyrażenie jest kontrtautologią. Zdanie jest zawsze fałszywe.</strong>
+				</p>
 			{/if}
 		</div>
 	{/if}
 
-	<div class="border border-gray-200 rounded-lg overflow-hidden" style="height: 600px;">
-		<AstVisualization ast={parsed} />
+	<div class="grid grid-cols-2 gap-4">
+		<div class="border border-gray-200 rounded-md overflow-hidden" style="height: 600px;">
+			{#if sentence.length > 0 && !(parsed instanceof Error)}
+				<AstVisualization ast={parsed} />
+			{/if}
+		</div>
+		<div class="border border-gray-200 rounded-md overflow-hidden" style="height: 600px;">
+			{#if sentence.length > 0 && !(parsed instanceof Error)}
+				<BooleanTable ast={parsed} />
+			{/if}
+		</div>
 	</div>
 </div>

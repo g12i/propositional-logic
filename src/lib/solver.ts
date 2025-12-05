@@ -5,7 +5,7 @@ import { dfs, isBinary, isLiteral, isUnary } from './utils/ast-utils.js';
 
 type Model = Map<string, boolean>;
 
-function evaluate(node: Node, model: Model): boolean {
+export function evaluate(node: Node, model: Model): boolean {
 	if (isLiteral(node)) {
 		return model.get(node.constant) ?? false;
 	}

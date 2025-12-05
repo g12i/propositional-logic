@@ -6,14 +6,17 @@
 		SvelteFlow,
 		type Edge as FlowEdge,
 		type Node as FlowNode,
-		type NodeTypes,
 	} from '@xyflow/svelte';
 	import { stratify, tree } from 'd3-hierarchy';
 	import type { Node } from '../ast.js';
 	import { AND, EQ, IMPL, NOT, OR } from '../constants.js';
 	import { bfs, dfs, isBinary, isLiteral, isUnary } from '../utils/ast-utils.js';
 
-	let { ast }: { ast?: Node | Error } = $props();
+	type Props = {
+		ast: Node;
+	};
+
+	let { ast }: Props = $props();
 
 	const nodeWidth = 120;
 	const nodeHeight = 50;
@@ -77,7 +80,7 @@
 			data: { label },
 			draggable: false,
 			selectable: false,
-			class: `rounded-lg! ${className}`,
+			class: `rounded-md! ${className}`,
 		};
 	};
 
@@ -122,13 +125,7 @@
 	};
 
 	// Derived state for flow nodes and edges
-	let flowData = $derived.by(() => {
-		if (!ast || ast instanceof Error) {
-			return { nodes: [] as FlowNode[], edges: [] as FlowEdge[] };
-		}
-
-		return astToFlowNodes(ast);
-	});
+	let flowData = $derived.by(() => astToFlowNodes(ast));
 </script>
 
 <div class="w-full h-full">

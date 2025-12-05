@@ -26,7 +26,7 @@
 	{onclick}
 	{type}
 	class={[
-		'border border-solid rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors',
+		'border border-solid rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors',
 		size === 'sm' && 'px-2 py-0.5 text-sm',
 		size === 'md' && 'px-3 py-1 text-base',
 		variant === 'primary' && 'bg-blue-500 text-white hover:bg-blue-600 border-blue-500',

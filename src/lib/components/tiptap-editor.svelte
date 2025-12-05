@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { AND, EQ, IMPL, NOT, OR } from '$lib/constants';
 	import { Editor, Node } from '@tiptap/core';
+	import FloatingMenu from '@tiptap/extension-floating-menu';
 	import Paragraph from '@tiptap/extension-paragraph';
 	import Placeholder from '@tiptap/extension-placeholder';
 	import Text from '@tiptap/extension-text';
-	import FloatingMenu from '@tiptap/extension-floating-menu';
-	import { AND, OR, IMPL, EQ, NOT } from '$lib/constants';
+	import { onDestroy, onMount } from 'svelte';
 	import Button from './ui/button.svelte';
 
 	type Props = {
@@ -19,6 +19,7 @@
 	let editorElement = $state<HTMLDivElement>();
 	let floatingMenuElement = $state<HTMLDivElement>();
 	let editorState = $state<{ editor: Editor | null }>({ editor: null });
+	let focused = $state(false);
 
 	const OneLiner = Node.create({
 		name: 'oneLiner',
@@ -27,7 +28,7 @@
 	});
 
 	onMount(() => {
-		if (!editorElement || !floatingMenuElement) return;
+		if (!editorElement) return;
 
 		editorState.editor = new Editor({
 			element: editorElement,
@@ -56,6 +57,12 @@
 				},
 			},
 			content: initialContent,
+			onFocus: () => {
+				focused = true;
+			},
+			onBlur: () => {
+				focused = false;
+			},
 			onUpdate: ({ editor }) => {
 				onupdate(editor);
 				editorState = { editor };
@@ -65,6 +72,7 @@
 			},
 		});
 	});
+
 	onDestroy(() => {
 		editorState.editor?.destroy();
 	});
@@ -77,32 +85,32 @@
 <div class="relative">
 	<div
 		bind:this={floatingMenuElement}
-		class="flex gap-1 p-1 bg-white border border-gray-300 rounded-lg shadow-sm"
+		class={[
+			'flex gap-1 p-1 bg-white border border-gray-300 rounded-md shadow-sm floating-menu',
+			{ 'invisible!': !focused },
+		]}
 	>
-		{#if editorState.editor}
-			<Button size="sm" variant="ghost" onclick={() => insertSymbol(AND)}>
-				{AND}
-			</Button>
-			<Button size="sm" variant="ghost" onclick={() => insertSymbol(OR)}>
-				{OR}
-			</Button>
-			<Button size="sm" variant="ghost" onclick={() => insertSymbol(IMPL)}>
-				{IMPL}
-			</Button>
-			<Button size="sm" variant="ghost" onclick={() => insertSymbol(EQ)}>
-				{EQ}
-			</Button>
-			<Button size="sm" variant="ghost" onclick={() => insertSymbol(NOT)}>
-				{NOT}
-			</Button>
-			<Button size="sm" variant="ghost" onclick={() => insertSymbol('(')}>(</Button>
-			<Button size="sm" variant="ghost" onclick={() => insertSymbol(')')}>)</Button>
-		{/if}
+		<Button size="sm" variant="ghost" onclick={() => insertSymbol(AND)}>
+			{AND}
+		</Button>
+		<Button size="sm" variant="ghost" onclick={() => insertSymbol(OR)}>
+			{OR}
+		</Button>
+		<Button size="sm" variant="ghost" onclick={() => insertSymbol(IMPL)}>
+			{IMPL}
+		</Button>
+		<Button size="sm" variant="ghost" onclick={() => insertSymbol(EQ)}>
+			{EQ}
+		</Button>
+		<Button size="sm" variant="ghost" onclick={() => insertSymbol(NOT)}>
+			{NOT}
+		</Button>
+		<Button size="sm" variant="ghost" onclick={() => insertSymbol('(')}>(</Button>
+		<Button size="sm" variant="ghost" onclick={() => insertSymbol(')')}>)</Button>
 	</div>
-
 	<div
 		bind:this={editorElement}
-		class="border border-gray-300 rounded-lg focus-within:ring-1 focus-within:ring-blue-500"
+		class="border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-blue-500"
 	></div>
 </div>
 
