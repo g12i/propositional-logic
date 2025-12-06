@@ -52,7 +52,7 @@
 
 		<TiptapEditor
 			initialContent={sentence}
-			placeholder="Wprowadź wyrażenie logiki zdaniowej (np. p∨~p)"
+			placeholder="np. p∨~p"
 			onupdate={handleEditorUpdate}
 		/>
 	</div>
